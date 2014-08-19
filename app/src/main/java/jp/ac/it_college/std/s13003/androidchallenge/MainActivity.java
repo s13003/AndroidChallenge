@@ -71,6 +71,7 @@ public class MainActivity extends Activity {
             ft.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
             ft.commit();
             touch.setVisibility(View.INVISIBLE);
+
         }
         return true;
     }

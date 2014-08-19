@@ -36,7 +36,6 @@ public class DifficultyFragment extends Fragment implements View.OnClickListener
                 difficultySelected("EASY");
                 break;
 
-
             case R.id.button2:
                 difficultySelected("NORMAL");
                 break;
