@@ -1,6 +1,7 @@
 package jp.ac.it_college.std.s13003.androidchallenge;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Matrix;
@@ -17,6 +18,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.WindowManager;
+import android.widget.TextView;
 
 import java.security.PublicKey;
 import java.util.Random;
@@ -41,10 +43,24 @@ import java.util.Random;
     private Canvas mCanvas;
     public static int FallSpeed;
     public static int frame;
+    private TextView scoreText;
+    private int score;
     private final int[] COLORS = {Color.RED, Color.BLUE, Color.WHITE,
-                                  Color.CYAN, Color.GREEN, Color.MAGENTA,
-                                  Color.YELLOW};
+            Color.CYAN, Color.GREEN, Color.MAGENTA,
+            Color.YELLOW};
     private int blockColor;
+    private static int mdifficulty;
+    private static final int EASY = 0;
+    private static final int NORMAL = 1;
+    private static final int HARD = 2;
+    private final int EASY_SCORE = 100;
+    private final int NORMAL_SCORE = 200;
+    private final int HARD_SCORE = 300;
+
+
+
+
+
     int[][][] blocks = {
             {
                     {1, 1},
@@ -91,6 +107,7 @@ import java.util.Random;
         mHolder = getHolder();
         mHolder.addCallback(this);
         initGame();
+        scoreText = (TextView)((GameActivity)context).findViewById(R.id.score);
     }
 
     public void initGame() {
@@ -99,7 +116,7 @@ import java.util.Random;
             for (int x = 0; x < mapWidth; x++) {
                 if (y == mapHeight - 1 || x == mapWidth - 1 || x == 0) {
                     blockMap[y][x] = 1;
-                }else {
+                } else {
                     blockMap[y][x] = 0;
                 }
             }
@@ -123,6 +140,7 @@ import java.util.Random;
         return true;
     }
 
+/*
     private void paintMatrix(Canvas canvas, int[][] matrix, int offsetx, int offsety, int color) {
         ShapeDrawable rect = new ShapeDrawable(new RectShape());
         rect.getPaint().setColor(color);
@@ -140,6 +158,7 @@ import java.util.Random;
             }
         }
     }
+*/
 
     void mergeMatrix(int[][] block, int offsetx, int offsety) {
         for (int y = 0; y < block.length; y++) {
@@ -162,7 +181,6 @@ import java.util.Random;
             }
             if (full) blockMap[y] = null;
         }
-        // 新しいmapにnull以外の行を詰めてコピーする
         int[][] newMap = new int[mapHeight][];
         int y2 = mapHeight - 1;
         for (int y = mapHeight - 1; y >= 0; y--) {
@@ -172,18 +190,26 @@ import java.util.Random;
                 newMap[y2--] = blockMap[y];
             }
         }
-
-        // 消えた行数分新しい行を追加する
         for (int i = 0; i <= y2; i++) {
             int[] newRow = new int[mapWidth];
-            for (int j = 0;j < mapWidth; j++) {
-                if (j == 0 || j == mapWidth - 1){
-                newRow[j] = 1;
-            }else {
+            for (int j = 0; j < mapWidth; j++) {
+                if (j == 0 || j == mapWidth - 1) {
+                    newRow[j] = 1;
+                } else {
                     newRow[j] = 0;
                 }
             }
             newMap[i] = newRow;
+            switch (mdifficulty) {
+                case EASY:mHandler.sendEmptyMessage(EASY_SCORE);
+                    break;
+
+                case NORMAL:mHandler.sendEmptyMessage(NORMAL_SCORE);
+                    break;
+
+                case HARD:mHandler.sendEmptyMessage(HARD_SCORE);
+                    break;
+            }
         }
         blockMap = newMap;
     }
@@ -200,14 +226,15 @@ import java.util.Random;
         return rotated;
     }
 
-
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         return gestureDetector.onTouchEvent(event);
     }
 
     @Override
-    public boolean onDown(MotionEvent motionEvent) {
+    public boolean onDown(MotionEvent motionEvent)
+
+    {
         return true;
     }
 
@@ -254,11 +281,13 @@ import java.util.Random;
 
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
+        mHandler.sendEmptyMessage(0);
         blockColor = COLORS[mRand.nextInt(COLORS.length)];
         frame = 0;
         mIsAttached = true;
         mThread = new Thread(this);
         mThread.start();
+
     }
 
     @Override
@@ -308,6 +337,10 @@ import java.util.Random;
             }
             frame++;
             getHolder().unlockCanvasAndPost(mCanvas);
+            if (gameOver()) {
+                Intent intent = new Intent(getContext(), ResultActivity.class);
+                getContext().startActivity(intent);
+            }
         }
     }
 
@@ -375,7 +408,24 @@ import java.util.Random;
         }
     }
 
-    public static void setFallSpeed(int difficulty) {
-        FallSpeed = difficulty;
+    public static void setDifficulty(String difficulty) {
+        if (difficulty.equals("EASY")) {
+            FallSpeed = 100;
+            mdifficulty = EASY;
+        } else if (difficulty.equals("NORMAL")) {
+            FallSpeed = 70;
+            mdifficulty = NORMAL;
+        } else if (difficulty.equals("HARD")) {
+            FallSpeed = 30;
+            mdifficulty = HARD;
+        }
     }
+
+    public Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            score += msg.what;
+            scoreText.setText("score" + String.valueOf(score));
+        }
+    };
 }

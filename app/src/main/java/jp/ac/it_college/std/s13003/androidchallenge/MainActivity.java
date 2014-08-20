@@ -60,11 +60,14 @@ public class MainActivity extends Activity {
         }
     }
 
+    TextView touch;
+
+
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        TextView touch = (TextView)findViewById(R.id.textView2);
         int action = event.getAction() & MotionEvent.ACTION_MASK;
-        if (action == MotionEvent.ACTION_DOWN) {
+        if (action == MotionEvent.ACTION_DOWN && touch == null) {
+            touch = (TextView)findViewById(R.id.textView2);
             DifficultyFragment fragment = DifficultyFragment.newInstance();
             FragmentTransaction ft = getFragmentManager().beginTransaction();
             ft.replace(R.id.start_fragment, fragment);

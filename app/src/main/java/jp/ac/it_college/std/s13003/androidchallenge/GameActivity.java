@@ -1,25 +1,12 @@
 package jp.ac.it_college.std.s13003.androidchallenge;
 
 import android.app.Activity;
-import android.app.Fragment;
-import android.content.Context;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Point;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.RectShape;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
-import android.os.Message;
 import android.util.Log;
-import android.view.Display;
-import android.view.GestureDetector;
 import android.view.KeyEvent;
-import android.view.MotionEvent;
-import android.view.SurfaceView;
-import android.os.Handler;
 import android.widget.LinearLayout;
-
-import java.util.Random;
 
 /**
  * Created by s13003 on 14/08/07.
@@ -29,19 +16,46 @@ public class GameActivity extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(new Block(this));
+        setContentView(R.layout.game);
         String difficulty = getIntent().getStringExtra("Difficulty");
         Log.v("difficulty", difficulty);
+        LinearLayout mainLayout = (LinearLayout)findViewById(R.id.tetrisLayout);
+        mainLayout.addView(new Block(this));
+
 
         if (difficulty.
                 equals("EASY")) {
-            Block.setFallSpeed(100);
+            Block.setDifficulty("EASY");
         }else if (difficulty.equals("NORMAL")) {
-            Block.setFallSpeed(70);
+            Block.setDifficulty("NORMAL");
         }else if (difficulty.equals("HARD")) {
-            Block.setFallSpeed(10);
+            Block.setDifficulty("HARD");
         }
 
+    }
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
+            new AlertDialog.Builder(this)
+                    .setTitle("終了の確認")
+                    .setPositiveButton("はい",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                    finish();
+                                }
+                            })
+                    .setNegativeButton("いいえ",
+                            new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialogInterface, int i) {
+                                }
+                            })
+                    .show();
+            return true;
+        }else {
+            return false;
+        }
     }
 
     @Override
