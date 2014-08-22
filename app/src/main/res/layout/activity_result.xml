@@ -1,7 +1,40 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/container"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context="jp.ac.it_college.std.s13003.androidchallenge.ResultActivity"
-    tools:ignore="MergeRootFrame" />
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/textView3"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/score"
+        android:textSize="50dp" />
+
+    <TextView
+        android:textSize="50dp"
+        android:layout_below="@+id/textView3"
+        android:layout_centerHorizontal="true"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:id="@+id/result_score"
+        android:layout_marginTop="20dp" />
+
+    <Button
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/result_score"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/back_title"
+        android:id="@+id/back_title_button" />
+
+    <Button
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/back_title_button"
+        android:layout_width="100dp"
+        android:layout_height="wrap_content"
+        android:text="@string/finish"
+        android:id="@+id/finish_button" />
+
+</RelativeLayout>

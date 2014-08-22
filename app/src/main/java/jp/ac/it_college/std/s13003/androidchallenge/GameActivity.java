@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.widget.LinearLayout;
 
 /**
@@ -36,12 +37,15 @@ public class GameActivity extends Activity {
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
+            Block.stopLoop();
             new AlertDialog.Builder(this)
-                    .setTitle("終了の確認")
+                    .setCancelable(false)
+                    .setTitle("ゲームを終了してタイトル画面に戻りますか？")
                     .setPositiveButton("はい",
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    Block.stopLoop();
                                     finish();
                                 }
                             })
@@ -49,6 +53,7 @@ public class GameActivity extends Activity {
                             new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialogInterface, int i) {
+                                    Block.stopLoop();
                                 }
                             })
                     .show();

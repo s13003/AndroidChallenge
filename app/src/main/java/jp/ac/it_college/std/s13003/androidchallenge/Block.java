@@ -4,23 +4,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Handler;
 import android.os.Message;
+import android.util.Log;
 import android.view.Display;
 import android.view.GestureDetector;
-import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-
-import java.security.PublicKey;
 import java.util.Random;
 
 /**
@@ -29,14 +25,14 @@ import java.util.Random;
     public class Block extends SurfaceView
             implements GestureDetector.OnGestureListener, SurfaceHolder.Callback,
                 Runnable, GestureDetector.OnDoubleTapListener {
-
     Random mRand = new Random(System.currentTimeMillis());
-    private int mapWidth = 12;
+    private final static int BLOCK_HEIGHT = 53;
+    private final static int BLOCK_WIDTH = 45;
+    private int mapWidth =12;
     private int mapHeight = 21;
     private int posx = mapWidth / 2, posy;
     private int[][] blockMap = new int[mapHeight][];
     private GestureDetector gestureDetector;
-    private final static int BLOCK_SIZE = 53;
     protected static Thread mThread;
     private SurfaceHolder mHolder;
     public static boolean mIsAttached;
@@ -44,9 +40,10 @@ import java.util.Random;
     public static int FallSpeed;
     public static int frame;
     private TextView scoreText;
+    private int ORANGE = Color.rgb(243,152, 0);
     private int score;
-    private final int[] COLORS = {Color.RED, Color.BLUE, Color.WHITE,
-            Color.CYAN, Color.GREEN, Color.MAGENTA,
+    private final int[] COLORS = {Color.RED, Color.BLUE,
+            Color.CYAN, Color.GREEN, ORANGE,
             Color.YELLOW};
     private int blockColor;
     private static int mdifficulty;
@@ -56,12 +53,14 @@ import java.util.Random;
     private final int EASY_SCORE = 100;
     private final int NORMAL_SCORE = 200;
     private final int HARD_SCORE = 300;
-
-
-
-
-
     int[][][] blocks = {
+            {
+                    {1},
+                    {1},
+                    {1},
+                    {1},
+                    {1}
+            },
             {
                     {1, 1},
                     {0, 1},
@@ -98,11 +97,19 @@ import java.util.Random;
                     {1}
             }
     };
+    private static boolean isStop = false;
 
     private int[][] block = blocks[mRand.nextInt(blocks.length)];
 
     public Block(Context context) {
         super(context);
+        Display display = ((GameActivity)context).getWindowManager().getDefaultDisplay();
+        Point point = new Point();
+        display.getSize(point);
+        int D_width = point.x;
+        int D_height = point.y;
+        Log.v("width", String.valueOf(D_width));
+        Log.v("height", String.valueOf(D_height));
         gestureDetector = new GestureDetector(context, this);
         mHolder = getHolder();
         mHolder.addCallback(this);
@@ -122,7 +129,6 @@ import java.util.Random;
             }
         }
     }
-
 
     boolean check(int[][] block, int offsetx, int offsety) {
         if (offsetx < 0 || offsety < 0 ||
@@ -308,11 +314,6 @@ import java.util.Random;
 
     @Override
     public boolean onDoubleTap(MotionEvent motionEvent) {
-        return false;
-    }
-
-    @Override
-    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
         int y = posy;
         while (check(block, posx, y)) {
             y++;
@@ -324,26 +325,33 @@ import java.util.Random;
     }
 
     @Override
+    public boolean onDoubleTapEvent(MotionEvent motionEvent) {
+        return false;
+    }
+
+    @Override
     public void run() {
         while (mIsAttached) {
-            mCanvas = getHolder().lockCanvas();
-            mCanvas.drawColor(Color.WHITE);
+            if (!isStop) {
+                mCanvas = getHolder().lockCanvas();
+                mCanvas.drawColor(Color.WHITE);
 
-            drawMatrix(block, posx, posy, blockColor);
-            drawMatrix(blockMap, 0, 0, Color.GRAY);
+                drawMap(block, posx, posy, blockColor);
+                drawMap(blockMap, 0, 0, Color.GRAY);
 
-            if (frame % FallSpeed == 0) {
-                FallBlock();
-            }
-            frame++;
-            getHolder().unlockCanvasAndPost(mCanvas);
-            if (gameOver()) {
-                Intent intent = new Intent(getContext(), ResultActivity.class);
-                getContext().startActivity(intent);
+                if (frame % FallSpeed == 0) {
+                    FallBlock();
+                }
+                frame++;
+                getHolder().unlockCanvasAndPost(mCanvas);
+                if (gameOver()) {
+                    Intent intent = new Intent(getContext(), ResultActivity.class);
+                    intent.putExtra("score", score);
+                    getContext().startActivity(intent);
+                }
             }
         }
     }
-
     public void FallBlock() {
         if (check(block, posx, posy + 1)) {
             posy++;
@@ -378,7 +386,7 @@ import java.util.Random;
 
     }*/
 
-    private void drawMatrix(int[][] matrix, int offsetx, int offsety, int color) {
+    private void drawMap(int[][] matrix, int offsetx, int offsety, int color) {
         ShapeDrawable rect = new ShapeDrawable(new RectShape());
         rect.getPaint().setColor(color);
 
@@ -388,9 +396,9 @@ import java.util.Random;
         for (int y = 0; y < h; y++) {
             for (int x = 0; x < w; x++) {
                 if (matrix[y][x] != 0) {
-                    int px = (x + offsetx) * BLOCK_SIZE;
-                    int py = (y + offsety) * BLOCK_SIZE;
-                    rect.setBounds(px, py, px + BLOCK_SIZE, py + BLOCK_SIZE);
+                    int px = (x + offsetx) * BLOCK_WIDTH;
+                    int py = (y + offsety) * BLOCK_HEIGHT;
+                    rect.setBounds(px, py, px + BLOCK_WIDTH, py + BLOCK_HEIGHT);
                     rect.draw(mCanvas);
                 }
             }
@@ -428,4 +436,9 @@ import java.util.Random;
             scoreText.setText("score" + String.valueOf(score));
         }
     };
+
+    public static void stopLoop() {
+        isStop = !isStop;
+    }
+
 }

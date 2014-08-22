@@ -29,6 +29,7 @@ public class DifficultyFragment extends Fragment implements View.OnClickListener
         intent.putExtra("Difficulty", difficulty);
         startActivity(intent);
     }
+
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
